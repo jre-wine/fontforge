@@ -194,7 +194,6 @@ static void SFDDumpUTF7Str(FILE *sfd, const char *_str) {
 	utf7_encode(sfd,prev);
     }
     putc('"',sfd);
-    putc(' ',sfd);
 }
 
 
@@ -705,7 +704,7 @@ static void SFDDumpAnchorPoints(FILE *sfd,SplineChar *sc) {
     for ( ap = sc->anchor; ap!=NULL; ap=ap->next ) {
 	fprintf( sfd, "AnchorPoint: " );
 	SFDDumpUTF7Str(sfd,ap->anchor->name);
-	fprintf( sfd, "%g %g %s %d",
+	fprintf( sfd, " %g %g %s %d",
 		(double) ap->me.x, (double) ap->me.y,
 		ap->type==at_centry ? "entry" :
 		ap->type==at_cexit ? "exit" :
@@ -1381,7 +1380,10 @@ static void SFDDumpChar(FILE *sfd,SplineChar *sc,EncMap *map,int *newgids,int to
 		    "LCarets2:", NULL };
 	    fprintf( sfd, "%s ", keywords[pst->type] );
 	    if ( pst->subtable!=NULL )
+	    {
 		SFDDumpUTF7Str(sfd,pst->subtable->subtable_name );
+		putc(' ',sfd);
+	    }
 	    if ( pst->type==pst_position ) {
 		fprintf( sfd, "dx=%d dy=%d dh=%d dv=%d",
 			pst->u.pos.xoff, pst->u.pos.yoff,
@@ -1407,9 +1409,9 @@ static void SFDDumpChar(FILE *sfd,SplineChar *sc,EncMap *map,int *newgids,int to
 		putc('\n',sfd);
 	    } else if ( pst->type==pst_lcaret ) {
 		int i;
-		fprintf( sfd, "%d ", pst->u.lcaret.cnt );
+		fprintf( sfd, "%d", pst->u.lcaret.cnt );
 		for ( i=0; i<pst->u.lcaret.cnt; ++i )
-		    fprintf( sfd, "%d ", pst->u.lcaret.carets[i] );
+		    fprintf( sfd, " %d", pst->u.lcaret.carets[i] );
 		fprintf( sfd, "\n" );
 	    } else
 		fprintf( sfd, "%s\n", pst->u.lig.components );
@@ -1516,8 +1518,12 @@ static int SFDDumpBitmapFont(FILE *sfd,BDFFont *bdf,EncMap *encm,int *newgids,
     BDFRefChar *ref;
 
     ff_progress_next_stage();
-    fprintf( sfd, "BitmapFont: %d %d %d %d %d %s\n", bdf->pixelsize, bdf->glyphcnt,
-	    bdf->ascent, bdf->descent, BDFDepth(bdf), bdf->foundry?bdf->foundry:"" );
+    if (bdf->foundry)
+        fprintf( sfd, "BitmapFont: %d %d %d %d %d %s\n", bdf->pixelsize, bdf->glyphcnt,
+                 bdf->ascent, bdf->descent, BDFDepth(bdf), bdf->foundry );
+    else
+        fprintf( sfd, "BitmapFont: %d %d %d %d %d\n", bdf->pixelsize, bdf->glyphcnt,
+                 bdf->ascent, bdf->descent, BDFDepth(bdf) );
     if ( bdf->prop_cnt>0 ) {
 	fprintf( sfd, "BDFStartProperties: %d\n", bdf->prop_cnt );
 	for ( i=0; i<bdf->prop_cnt; ++i ) {
@@ -1582,10 +1588,13 @@ static void SFDDumpPrivate(FILE *sfd,struct psdict *private) {
 
 static void SFDDumpLangName(FILE *sfd, struct ttflangname *ln) {
     int i, end;
-    fprintf( sfd, "LangName: %d ", ln->lang );
+    fprintf( sfd, "LangName: %d", ln->lang );
     for ( end = ttf_namemax; end>0 && ln->names[end-1]==NULL; --end );
     for ( i=0; i<end; ++i )
+    {
+	putc(' ',sfd);
 	SFDDumpUTF7Str(sfd,ln->names[i]);
+    }
     putc('\n',sfd);
 }
 
@@ -2023,10 +2032,10 @@ static int SFD_Dump(FILE *sfd,SplineFont *sf,EncMap *map,EncMap *normal,
 	for ( i=1; i<sf->mark_class_cnt; ++i ) {	/* Class 0 is unused */
 	    SFDDumpUTF7Str(sfd, sf->mark_class_names[i]);
 	    if ( sf->mark_classes[i]!=NULL )
-		fprintf( sfd, "%d %s\n", (int) strlen(sf->mark_classes[i]),
+		fprintf( sfd, " %d %s\n", (int) strlen(sf->mark_classes[i]),
 			sf->mark_classes[i] );
 	    else
-		fprintf( sfd, "0 \n" );
+		fprintf( sfd, " 0 \n" );
 	}
     }
     if ( sf->mark_set_cnt!=0 ) {
@@ -2302,8 +2311,9 @@ static int SFD_Dump(FILE *sfd,SplineFont *sf,EncMap *map,EncMap *normal,
     }
     if ( sf->anchor!=NULL ) {
 	AnchorClass *an;
-	fprintf(sfd, "AnchorClass2: ");
+	fprintf(sfd, "AnchorClass2:");
 	for ( an=sf->anchor; an!=NULL; an=an->next ) {
+	    putc(' ',sfd);
 	    SFDDumpUTF7Str(sfd,an->name);
 	    putc(' ',sfd);
 	    SFDDumpUTF7Str(sfd,an->subtable->subtable_name );
