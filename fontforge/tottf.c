@@ -2924,7 +2924,11 @@ static void sethead(struct head *head,SplineFont *sf,struct alltabs *at,
 	head->flags |= (1<<9);		/* Apple documents this */
     /* if there are any indic characters, set bit 10 */
 
+#if 0
     time(&now);		/* seconds since 1970, need to convert to seconds since 1904 */
+#else  /* AJ - don't put timestamps in output files */
+    now = 0;
+#endif
     cvt_unix_to_1904(now,head->modtime);
     memcpy(head->createtime,head->modtime,sizeof(head->modtime));
 
@@ -3890,10 +3894,16 @@ void DefaultTTFEnglishNames(struct ttflangname *dummy, SplineFont *sf) {
     if ( dummy->names[ttf_uniqueid]==NULL || *dummy->names[ttf_uniqueid]=='\0' ) {
 	time(&now);
 	tm = localtime(&now);
+#if 0
 	sprintf( buffer, "%s : %s : %d-%d-%d",
 		BDFFoundry?BDFFoundry:TTFFoundry?TTFFoundry:"FontForge 2.0",
 		sf->fullname!=NULL?sf->fullname:sf->fontname,
 		tm->tm_mday, tm->tm_mon+1, tm->tm_year+1900 );
+#else  /* AJ - don't put timestamps in output files */
+	sprintf( buffer, "%s : %s",
+		BDFFoundry?BDFFoundry:TTFFoundry?TTFFoundry:"FontForge 2.0",
+                sf->fullname!=NULL?sf->fullname:sf->fontname );
+#endif
 	dummy->names[ttf_uniqueid] = copy(buffer);
     }
     if ( dummy->names[ttf_fullname]==NULL || *dummy->names[ttf_fullname]=='\0' )
