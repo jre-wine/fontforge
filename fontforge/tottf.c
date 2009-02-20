@@ -2865,6 +2865,7 @@ static void sethead(struct head *head,SplineFont *sf,struct alltabs *at,
 	head->flags |= (1<<9);		/* Apple documents this */
     /* if there are any indic characters, set bit 10 */
 
+    /* todo? */
     cvt_unix_to_1904(sf->creationtime,head->createtime);
     cvt_unix_to_1904(sf->modificationtime,head->modtime);
 }
@@ -3595,10 +3596,17 @@ static void redohead(struct alltabs *at) {
     putlong(at->headf,at->head.magicNum);
     putshort(at->headf,at->head.flags);
     putshort(at->headf,at->head.emunits);
+#if 0
     putlong(at->headf,at->head.createtime[1]);
     putlong(at->headf,at->head.createtime[0]);
     putlong(at->headf,at->head.modtime[1]);
     putlong(at->headf,at->head.modtime[0]);
+#else  /* AJ/jre - don't put timestamps in output files */
+    putlong(at->headf,0);
+    putlong(at->headf,0);
+    putlong(at->headf,0);
+    putlong(at->headf,0);
+#endif
     putshort(at->headf,at->head.xmin);
     putshort(at->headf,at->head.ymin);
     putshort(at->headf,at->head.xmax);
@@ -3808,10 +3816,16 @@ void DefaultTTFEnglishNames(struct ttflangname *dummy, SplineFont *sf) {
     if ( dummy->names[ttf_uniqueid]==NULL || *dummy->names[ttf_uniqueid]=='\0' ) {
 	time(&now);
 	tm = localtime(&now);
+#if 0
 	sprintf( buffer, "%s : %s : %d-%d-%d",
 		BDFFoundry?BDFFoundry:TTFFoundry?TTFFoundry:"FontForge 2.0",
 		sf->fullname!=NULL?sf->fullname:sf->fontname,
 		tm->tm_mday, tm->tm_mon+1, tm->tm_year+1900 );
+#else  /* AJ - don't put timestamps in output files */
+	sprintf( buffer, "%s : %s",
+		BDFFoundry?BDFFoundry:TTFFoundry?TTFFoundry:"FontForge 2.0",
+                sf->fullname!=NULL?sf->fullname:sf->fontname );
+#endif
 	dummy->names[ttf_uniqueid] = copy(buffer);
     }
     if ( dummy->names[ttf_fullname]==NULL || *dummy->names[ttf_fullname]=='\0' )

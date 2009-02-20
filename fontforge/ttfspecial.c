@@ -2225,6 +2225,7 @@ int ttf_fftm_dump(SplineFont *sf,struct alltabs *at) {
 
     putlong(at->fftmf,0x00000001);	/* Version */
 
+#if 0
     cvt_unix_to_1904(LibFF_ModTime,results);
     putlong(at->fftmf,results[1]);
     putlong(at->fftmf,results[0]);
@@ -2236,6 +2237,14 @@ int ttf_fftm_dump(SplineFont *sf,struct alltabs *at) {
     cvt_unix_to_1904(sf->modificationtime,results);
     putlong(at->fftmf,results[1]);
     putlong(at->fftmf,results[0]);
+#else  /* AJ - don't put timestamps in output files */
+    putlong(at->fftmf,0);
+    putlong(at->fftmf,0);
+    putlong(at->fftmf,0);
+    putlong(at->fftmf,0);
+    putlong(at->fftmf,0);
+    putlong(at->fftmf,0);
+#endif
 
     at->fftmlen = ftell(at->fftmf);	/* had better be 7*4 */
 	    /* It will never be misaligned */
