@@ -1752,8 +1752,6 @@ static void BVMenuSetWidth(GWindow gw,struct gmenuitem *mi,GEvent *g) {
     SplineChar *sc;
     int val;
 
-    if ( !bv->bdf->sf->onlybitmaps )
-return;
     if ( mi->mid==MID_SetWidth ) {
 	sprintf( buffer,"%d",bv->bc->width);
 	ret = gwwv_ask_string(_("Set Width..."),buffer,_("Set Width..."));
@@ -1772,6 +1770,10 @@ return;
     else
 	bv->bc->vwidth = val;
     BCCharChangedUpdate(bv->bc);
+
+    if ( !bv->bdf->sf->onlybitmaps )
+return;
+
     for ( bdf=bv->bdf->sf->bitmaps; bdf!=NULL; bdf=bdf->next )
 	if ( bdf->pixelsize > mysize )
 return;
@@ -2059,10 +2061,10 @@ static void mtlistcheck(GWindow gw,struct gmenuitem *mi,GEvent *e) {
     for ( mi = mi->sub; mi->ti.text!=NULL || mi->ti.line ; ++mi ) {
 	switch ( mi->mid ) {
 	  case MID_SetWidth:
-	    mi->ti.disabled = !bv->bdf->sf->onlybitmaps;
+	    mi->ti.disabled = 0;
 	  break;
 	  case MID_SetVWidth:
-	    mi->ti.disabled = !bv->bdf->sf->onlybitmaps || !bv->bdf->sf->hasvmetrics;
+	    mi->ti.disabled = !bv->bdf->sf->hasvmetrics;
 	  break;
 	}
     }
