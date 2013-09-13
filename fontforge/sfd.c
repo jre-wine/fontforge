@@ -620,7 +620,7 @@ static void SFDDumpSplineSet(FILE *sfd,SplineSet *spl) {
 			(double) sp->prevcp.x, (double) sp->prevcp.y,
 			(double) sp->me.x, (double) sp->me.y );
 #endif
-	    fprintf(sfd, "%d", sp->pointtype|(sp->selected<<2)|
+	    fprintf(sfd, "%d", sp->pointtype|/*(sp->selected<<2)|*/
 			(sp->nextcpdef<<3)|(sp->prevcpdef<<4)|
 			(sp->roundx<<5)|(sp->roundy<<6)|
 			(sp->ttfindex==0xffff?(1<<7):0)|
